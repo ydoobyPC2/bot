@@ -8,11 +8,9 @@ const app = express();
 app.use(express.json());
 
 // ==============================
-// 🔐 Discord 토큰
+// 🔐 Discord 토큰 (로컬)
 // ==============================
-// Railway: 환경변수 사용
-// 로컬 테스트: LOCAL_DISCORD_TOKEN 사용
-const LOCAL_DISCORD_TOKEN = ""; // ← 로컬 테스트 시 여기에 토큰
+const LOCAL_DISCORD_TOKEN = "여기에_로컬_디스코드_봇_토큰";
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN || LOCAL_DISCORD_TOKEN;
 
 // ==============================
@@ -41,7 +39,7 @@ client.on("messageCreate", (msg) => {
   const content = msg.content.trim();
 
   // ==========================
-  // 📢 공지 (가장 먼저 처리)
+  // 📢 공지
   // ==========================
   if (content.startsWith("!공지")) {
     const message = content.replace("!공지", "").trim();
@@ -55,11 +53,22 @@ client.on("messageCreate", (msg) => {
       message
     });
 
-    return msg.reply("📢 공지가 Roblox 서버로 전송되었습니다.");
+    return msg.reply("📢 공지를 Roblox로 전송했습니다.");
   }
 
   // ==========================
-  // 나머지 명령어
+  // ☢️ 핵폭탄 (10초 카운트는 Roblox에서)
+  // ==========================
+  if (content === "!핵폭탄") {
+    commandQueue.push({
+      type: "nuke"
+    });
+
+    return msg.reply("☢️ 핵폭탄 카운트다운을 시작했습니다. (10초)");
+  }
+
+  // ==========================
+  // 킥 / 밴 / 언밴
   // ==========================
   const args = content.split(" ");
   const cmd = args.shift();
@@ -74,11 +83,9 @@ client.on("messageCreate", (msg) => {
 
   if (cmd === "!kick") {
     payload = { type: "kick", username, reason };
-  }
-  else if (cmd === "!ban") {
+  } else if (cmd === "!ban") {
     payload = { type: "ban", username, reason };
-  }
-  else if (cmd === "!unban") {
+  } else if (cmd === "!unban") {
     payload = { type: "unban", username };
   }
 
@@ -110,7 +117,7 @@ app.get("/roblox", (req, res) => {
 // ==============================
 // 서버 실행
 // ==============================
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Roblox API running on port ${PORT}`);
 });
@@ -119,8 +126,7 @@ app.listen(PORT, () => {
 // Discord 봇 로그인
 // ==============================
 if (!DISCORD_TOKEN) {
-  console.error("❌ DISCORD_TOKEN이 없어 Discord 봇을 실행할 수 없습니다.");
-  console.error("👉 로컬이면 LOCAL_DISCORD_TOKEN에 토큰을 넣으세요.");
+  console.error("❌ DISCORD_TOKEN이 없습니다.");
 } else {
   client.login(DISCORD_TOKEN);
 }
